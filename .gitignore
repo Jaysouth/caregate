@@ -35,3 +35,11 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Original Node.js app (keeping for reference)
+# Uncomment these if you want to exclude the original app
+# server/
+# public/
+# tests/
+# package.json
+# package-lock.json
