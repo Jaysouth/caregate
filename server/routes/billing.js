@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
 const authMiddleware = require('../middleware/auth');
+const config = require('../config');
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.post('/generate', authMiddleware, (req, res) => {
 
     // Calculate totals
     const subtotal = timesheets.reduce((sum, ts) => sum + ts.totalPay, 0);
-    const platformFee = subtotal * 0.15; // 15% platform fee
+    const platformFee = subtotal * config.PLATFORM_FEE_PERCENTAGE;
     const total = subtotal + platformFee;
 
     const invoiceId = uuidv4();

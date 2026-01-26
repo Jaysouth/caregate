@@ -4,7 +4,6 @@
 class Database {
   constructor() {
     this.users = new Map();
-    this.facilities = new Map();
     this.shifts = new Map();
     this.bookings = new Map();
     this.timesheets = new Map();

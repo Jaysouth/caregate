@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -21,7 +22,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Serve static files
+app.use(express.static(path.join(__dirname, '../public')));
+
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/users', userRoutes);
@@ -36,8 +40,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'CareGate API is running' });
 });
 
-// Root endpoint with API information
-app.get('/', (req, res) => {
+// API information endpoint
+app.get('/api', (req, res) => {
   res.json({
     name: 'CareGate API',
     version: '1.0.0',
@@ -59,6 +63,8 @@ app.get('/', (req, res) => {
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`CareGate server running on port ${PORT}`);
+    console.log(`Web interface: http://localhost:${PORT}`);
+    console.log(`API documentation: http://localhost:${PORT}/api`);
   });
 }
 

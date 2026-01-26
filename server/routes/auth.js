@@ -3,9 +3,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
+const config = require('../config');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'caregate-secret-key-change-in-production';
+const JWT_SECRET = config.JWT_SECRET;
 
 // Register new user (worker or facility)
 router.post('/register', async (req, res) => {

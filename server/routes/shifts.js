@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models/database');
 const authMiddleware = require('../middleware/auth');
+const config = require('../config');
 
 const router = express.Router();
 
@@ -25,17 +26,19 @@ function calculateDynamicPricing(baseRate, startTime, skillLevel) {
   
   // Urgency multiplier (within 24 hours)
   const hoursUntilShift = (new Date(startTime) - new Date()) / (1000 * 60 * 60);
-  if (hoursUntilShift < 24) {
-    rate *= 1.3; // 30% premium for urgent shifts
-  } else if (hoursUntilShift < 48) {
-    rate *= 1.15; // 15% premium
+  
+  // Only apply urgency premium for future shifts
+  if (hoursUntilShift > 0 && hoursUntilShift < 24) {
+    rate *= config.PRICING.URGENT_24H_MULTIPLIER;
+  } else if (hoursUntilShift > 0 && hoursUntilShift < 48) {
+    rate *= config.PRICING.URGENT_48H_MULTIPLIER;
   }
   
   // Skill level multiplier
   if (skillLevel === 'advanced') {
-    rate *= 1.2;
+    rate *= config.PRICING.SKILL_ADVANCED_MULTIPLIER;
   } else if (skillLevel === 'expert') {
-    rate *= 1.4;
+    rate *= config.PRICING.SKILL_EXPERT_MULTIPLIER;
   }
   
   return Math.round(rate * 100) / 100;
@@ -151,7 +154,7 @@ router.get('/matches', authMiddleware, (req, res) => {
 
       // Location proximity (30% weight)
       const distance = calculateDistance(worker.location, shift.location);
-      const locationScore = Math.max(0, (50 - distance) / 50); // Max 50km
+      const locationScore = Math.max(0, (config.MAX_MATCHING_DISTANCE - distance) / config.MAX_MATCHING_DISTANCE);
       matchScore += locationScore * 30;
 
       // Availability (30% weight) - simplified, assume available

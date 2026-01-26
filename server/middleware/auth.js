@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'caregate-secret-key-change-in-production';
+const JWT_SECRET = config.JWT_SECRET;
+
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable must be set in production');
+}
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
