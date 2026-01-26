@@ -150,6 +150,23 @@ class CareGate_Activator {
             KEY meta_key (meta_key)
         ) $charset_collate;";
 
+        // Table for OTP/2FA
+        $table_otp = $wpdb->prefix . 'caregate_otp';
+        $sql_otp = "CREATE TABLE IF NOT EXISTS $table_otp (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            otp_code varchar(10) NOT NULL,
+            method varchar(20) DEFAULT 'email',
+            expiry datetime NOT NULL,
+            verified tinyint(1) DEFAULT 0,
+            notification_count int DEFAULT 1,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY otp_code (otp_code),
+            KEY expiry (expiry)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_shifts);
         dbDelta($sql_bookings);
@@ -158,6 +175,7 @@ class CareGate_Activator {
         dbDelta($sql_invoice_timesheets);
         dbDelta($sql_compliance);
         dbDelta($sql_user_meta);
+        dbDelta($sql_otp);
 
         // Set default options
         add_option('caregate_platform_fee_percentage', 0.15);
@@ -166,6 +184,11 @@ class CareGate_Activator {
         add_option('caregate_urgent_48h_multiplier', 1.15);
         add_option('caregate_skill_advanced_multiplier', 1.2);
         add_option('caregate_skill_expert_multiplier', 1.4);
+        add_option('caregate_2fa_enabled', true);
+        add_option('caregate_recaptcha_site_key', '');
+        add_option('caregate_recaptcha_secret_key', '');
+        add_option('caregate_sms_api_key', '');
+        add_option('caregate_sms_api_url', '');
         
         // Create custom roles
         self::create_roles();

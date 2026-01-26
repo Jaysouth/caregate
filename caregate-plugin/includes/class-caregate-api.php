@@ -32,6 +32,26 @@ class CareGate_API {
             'permission_callback' => '__return_true'
         ));
 
+        // OTP/2FA routes
+        register_rest_route($this->namespace, '/auth/verify-otp', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'verify_otp'),
+            'permission_callback' => '__return_true'
+        ));
+
+        register_rest_route($this->namespace, '/auth/resend-otp', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'resend_otp'),
+            'permission_callback' => '__return_true'
+        ));
+
+        // reCAPTCHA config route
+        register_rest_route($this->namespace, '/config/recaptcha', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_recaptcha_config'),
+            'permission_callback' => '__return_true'
+        ));
+
         // User routes
         register_rest_route($this->namespace, '/users/me', array(
             'methods' => 'GET',
@@ -189,6 +209,30 @@ class CareGate_API {
      */
     public function login_user($request) {
         return CareGate_Auth::login($request);
+    }
+
+    /**
+     * Verify OTP.
+     */
+    public function verify_otp($request) {
+        return CareGate_Auth::verify_otp($request);
+    }
+
+    /**
+     * Resend OTP.
+     */
+    public function resend_otp($request) {
+        return CareGate_Auth::resend_otp($request);
+    }
+
+    /**
+     * Get reCAPTCHA configuration.
+     */
+    public function get_recaptcha_config($request) {
+        return new WP_REST_Response(array(
+            'enabled' => CareGate_ReCaptcha::is_enabled(),
+            'siteKey' => CareGate_ReCaptcha::get_site_key()
+        ), 200);
     }
 
     /**

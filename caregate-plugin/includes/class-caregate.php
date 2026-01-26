@@ -41,6 +41,8 @@ class CareGate {
      */
     private function load_dependencies() {
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-loader.php';
+        require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-recaptcha.php';
+        require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-twofa.php';
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-api.php';
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-auth.php';
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-shifts.php';
