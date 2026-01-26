@@ -37,6 +37,42 @@ class CareGate_Admin {
         
         add_submenu_page(
             $this->plugin_name,
+            'Dashboard',
+            'Dashboard',
+            'manage_options',
+            $this->plugin_name,
+            array($this, 'display_plugin_setup_page')
+        );
+        
+        add_submenu_page(
+            $this->plugin_name,
+            'UK Invoicing',
+            'UK Invoicing',
+            'manage_options',
+            $this->plugin_name . '-invoicing',
+            array($this, 'display_invoicing_page')
+        );
+        
+        add_submenu_page(
+            $this->plugin_name,
+            'Payroll',
+            'Payroll',
+            'manage_options',
+            $this->plugin_name . '-payroll',
+            array($this, 'display_payroll_page')
+        );
+        
+        add_submenu_page(
+            $this->plugin_name,
+            'Timesheet Clock',
+            'Timesheet Clock',
+            'manage_options',
+            $this->plugin_name . '-clock',
+            array($this, 'display_clock_page')
+        );
+        
+        add_submenu_page(
+            $this->plugin_name,
             'Settings',
             'Settings',
             'manage_options',
@@ -51,5 +87,17 @@ class CareGate_Admin {
 
     public function display_plugin_settings_page() {
         include_once CAREGATE_PLUGIN_DIR . 'admin/partials/caregate-admin-settings.php';
+    }
+    
+    public function display_invoicing_page() {
+        include_once CAREGATE_PLUGIN_DIR . 'admin/partials/caregate-admin-invoicing.php';
+    }
+    
+    public function display_payroll_page() {
+        include_once CAREGATE_PLUGIN_DIR . 'admin/partials/caregate-admin-payroll.php';
+    }
+    
+    public function display_clock_page() {
+        include_once CAREGATE_PLUGIN_DIR . 'admin/partials/caregate-admin-clock.php';
     }
 }

@@ -195,6 +195,105 @@ class CareGate_API {
             'callback' => array('CareGate_Compliance', 'get_required_documents'),
             'permission_callback' => array($this, 'is_authenticated')
         ));
+
+        // Payroll routes (UK salary payments)
+        register_rest_route($this->namespace, '/payroll/worker/(?P<worker_id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_Payroll', 'get_worker_for_payroll'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/payroll/calculate', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Payroll', 'calculate_payroll'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/payroll', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Payroll', 'create_payroll'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/payroll', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_Payroll', 'get_payroll_records'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/payroll/(?P<id>\d+)/send', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Payroll', 'send_salary_slip'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        // Clock in/out routes
+        register_rest_route($this->namespace, '/clock/in', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Clock', 'clock_in'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/clock/out', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Clock', 'clock_out'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/clock/status', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_Clock', 'get_clock_status'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/clock/records', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_Clock', 'get_clock_records'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/clock/manual', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Clock', 'manual_clock_entry'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        // UK Invoice routes
+        register_rest_route($this->namespace, '/uk-invoices', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_UK_Invoice', 'create_invoice'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/uk-invoices', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_UK_Invoice', 'get_invoices'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/uk-invoices/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_UK_Invoice', 'get_invoice_by_id'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/uk-invoices/(?P<id>\d+)', array(
+            'methods' => 'PUT',
+            'callback' => array('CareGate_UK_Invoice', 'update_invoice'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/uk-invoices/(?P<id>\d+)/send', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_UK_Invoice', 'send_invoice'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        register_rest_route($this->namespace, '/uk-invoices/(?P<id>\d+)/paid', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_UK_Invoice', 'mark_paid'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
     }
 
     /**

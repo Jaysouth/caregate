@@ -167,6 +167,109 @@ class CareGate_Activator {
             KEY expiry (expiry)
         ) $charset_collate;";
 
+        // Table for payroll (UK salary payments)
+        $table_payroll = $wpdb->prefix . 'caregate_payroll';
+        $sql_payroll = "CREATE TABLE IF NOT EXISTS $table_payroll (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            worker_id bigint(20) NOT NULL,
+            admin_id bigint(20) NOT NULL,
+            payment_period varchar(20) NOT NULL,
+            basic_pay_rate decimal(10,2) NOT NULL,
+            hours_worked decimal(10,2) NOT NULL,
+            overtime_pay decimal(10,2) DEFAULT 0,
+            shift_differentials decimal(10,2) DEFAULT 0,
+            bonus decimal(10,2) DEFAULT 0,
+            gross_pay decimal(10,2) NOT NULL,
+            tax decimal(10,2) NOT NULL,
+            national_insurance decimal(10,2) NOT NULL,
+            pension decimal(10,2) DEFAULT 0,
+            health_insurance decimal(10,2) DEFAULT 0,
+            agency_fees decimal(10,2) DEFAULT 0,
+            total_deductions decimal(10,2) NOT NULL,
+            net_pay decimal(10,2) NOT NULL,
+            notes text,
+            status varchar(20) DEFAULT 'pending',
+            payment_date datetime,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY worker_id (worker_id),
+            KEY payment_period (payment_period),
+            KEY status (status)
+        ) $charset_collate;";
+
+        // Table for clock in/out records
+        $table_clock = $wpdb->prefix . 'caregate_clock_records';
+        $sql_clock = "CREATE TABLE IF NOT EXISTS $table_clock (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            worker_id bigint(20) NOT NULL,
+            facility_id bigint(20) NOT NULL,
+            shift_id bigint(20) DEFAULT 0,
+            booking_id bigint(20) DEFAULT 0,
+            clock_in_time datetime NOT NULL,
+            clock_out_time datetime,
+            clock_in_method varchar(20) DEFAULT 'manual',
+            clock_out_method varchar(20),
+            card_id varchar(100),
+            location varchar(255),
+            break_time decimal(10,2) DEFAULT 0,
+            hours_worked decimal(10,2),
+            notes text,
+            status varchar(20) DEFAULT 'in_progress',
+            entered_by bigint(20),
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY worker_id (worker_id),
+            KEY facility_id (facility_id),
+            KEY status (status),
+            KEY clock_in_time (clock_in_time)
+        ) $charset_collate;";
+
+        // Table for UK invoices
+        $table_uk_invoices = $wpdb->prefix . 'caregate_uk_invoices';
+        $sql_uk_invoices = "CREATE TABLE IF NOT EXISTS $table_uk_invoices (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            invoice_number varchar(50) NOT NULL UNIQUE,
+            facility_id bigint(20) NOT NULL,
+            admin_id bigint(20) NOT NULL,
+            invoice_date date NOT NULL,
+            due_date date NOT NULL,
+            billing_period varchar(20),
+            agency_name varchar(255),
+            agency_address text,
+            agency_postcode varchar(20),
+            agency_phone varchar(50),
+            agency_email varchar(100),
+            agency_vat_number varchar(50),
+            agency_company_number varchar(50),
+            subtotal decimal(10,2) NOT NULL,
+            vat_rate decimal(5,4) DEFAULT 0.2000,
+            vat_amount decimal(10,2) NOT NULL,
+            total decimal(10,2) NOT NULL,
+            notes text,
+            status varchar(20) DEFAULT 'draft',
+            sent_date datetime,
+            paid_date datetime,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY facility_id (facility_id),
+            KEY invoice_number (invoice_number),
+            KEY status (status)
+        ) $charset_collate;";
+
+        // Table for invoice line items
+        $table_invoice_items = $wpdb->prefix . 'caregate_invoice_items';
+        $sql_invoice_items = "CREATE TABLE IF NOT EXISTS $table_invoice_items (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            invoice_id bigint(20) NOT NULL,
+            description varchar(255) NOT NULL,
+            quantity decimal(10,2) NOT NULL,
+            rate decimal(10,2) NOT NULL,
+            amount decimal(10,2) NOT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY invoice_id (invoice_id)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_shifts);
         dbDelta($sql_bookings);
@@ -176,6 +279,10 @@ class CareGate_Activator {
         dbDelta($sql_compliance);
         dbDelta($sql_user_meta);
         dbDelta($sql_otp);
+        dbDelta($sql_payroll);
+        dbDelta($sql_clock);
+        dbDelta($sql_uk_invoices);
+        dbDelta($sql_invoice_items);
 
         // Set default options
         add_option('caregate_platform_fee_percentage', 0.15);
@@ -189,6 +296,14 @@ class CareGate_Activator {
         add_option('caregate_recaptcha_secret_key', '');
         add_option('caregate_sms_api_key', '');
         add_option('caregate_sms_api_url', '');
+        add_option('caregate_agency_fee_percentage', 0.10);
+        add_option('caregate_agency_name', 'CareGate Staffing Ltd');
+        add_option('caregate_agency_address', '');
+        add_option('caregate_agency_postcode', '');
+        add_option('caregate_agency_phone', '');
+        add_option('caregate_agency_email', get_option('admin_email'));
+        add_option('caregate_agency_vat_number', '');
+        add_option('caregate_agency_company_number', '');
         
         // Create custom roles
         self::create_roles();

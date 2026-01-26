@@ -50,6 +50,9 @@ class CareGate {
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-timesheets.php';
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-billing.php';
         require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-compliance.php';
+        require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-payroll.php';
+        require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-clock.php';
+        require_once CAREGATE_PLUGIN_DIR . 'includes/class-caregate-uk-invoice.php';
         require_once CAREGATE_PLUGIN_DIR . 'admin/class-caregate-admin.php';
         require_once CAREGATE_PLUGIN_DIR . 'public/class-caregate-public.php';
 
