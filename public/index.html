@@ -31,27 +31,261 @@
                 </form>
 
                 <!-- Register Form -->
-                <form id="register-form" class="auth-form" style="display: none;">
+                <form id="register-form" class="auth-form multi-step-form" style="display: none;">
                     <h2>Register</h2>
-                    <input type="text" id="reg-name" placeholder="Full Name" required>
-                    <input type="email" id="reg-email" placeholder="Email" required>
-                    <input type="password" id="reg-password" placeholder="Password" required>
                     
-                    <label>I am a:</label>
-                    <select id="reg-role" onchange="toggleRoleFields()">
-                        <option value="worker">Healthcare Worker</option>
-                        <option value="facility">Care Facility</option>
-                    </select>
-
-                    <div id="worker-fields">
-                        <input type="text" id="reg-skills" placeholder="Skills (comma-separated)" value="Nursing, Elderly Care">
+                    <!-- Progress Indicator -->
+                    <div class="progress-indicator">
+                        <div class="step-item active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Account</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-item" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Details</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-item" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Professional</div>
+                        </div>
                     </div>
 
-                    <div id="facility-fields" style="display: none;">
-                        <input type="text" id="reg-facility-type" placeholder="Facility Type" value="Care Home">
+                    <!-- Step 1: Account Information -->
+                    <div class="form-step active" data-step="1">
+                        <h3>Account Information</h3>
+                        
+                        <div class="form-group">
+                            <label>Select Your Role <span class="required">*</span></label>
+                            <div class="role-selection">
+                                <div class="role-card" onclick="selectRole('worker')" data-role="worker">
+                                    <div class="role-icon">👨‍⚕️</div>
+                                    <div class="role-title">Care Worker</div>
+                                    <div class="role-desc">Healthcare professional</div>
+                                </div>
+                                <div class="role-card" onclick="selectRole('facility')" data-role="facility">
+                                    <div class="role-icon">🏥</div>
+                                    <div class="role-title">Care Facility</div>
+                                    <div class="role-desc">Care home or hospital</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="reg-role" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-name">Full Name / Facility Name <span class="required">*</span></label>
+                            <input type="text" id="reg-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="reg-email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-password">Password <span class="required">*</span></label>
+                            <input type="password" id="reg-password" minlength="8" required>
+                            <small>Minimum 8 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-confirm-password">Confirm Password <span class="required">*</span></label>
+                            <input type="password" id="reg-confirm-password" required>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Register</button>
+                    <!-- Step 2: UK Details (Worker) -->
+                    <div class="form-step worker-only" data-step="2" style="display: none;">
+                        <h3>Personal & UK Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="reg-phone" placeholder="+44 7XXX XXXXXX" required>
+                            <small>UK format: +44 or 0</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-ni-number">National Insurance Number <span class="required">*</span></label>
+                            <input type="text" id="reg-ni-number" placeholder="AB123456C" maxlength="9" required>
+                            <small>Format: 2 letters, 6 digits, 1 letter</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-postcode">UK Postcode <span class="required">*</span></label>
+                            <input type="text" id="reg-postcode" placeholder="SW1A 1AA" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-address">Full Address</label>
+                            <textarea id="reg-address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-dob">Date of Birth</label>
+                            <input type="date" id="reg-dob">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-emergency-name">Emergency Contact Name</label>
+                            <input type="text" id="reg-emergency-name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-emergency-phone">Emergency Contact Phone</label>
+                            <input type="tel" id="reg-emergency-phone">
+                        </div>
+                    </div>
+
+                    <!-- Step 2: UK Details (Facility) -->
+                    <div class="form-step facility-only" data-step="2" style="display: none;">
+                        <h3>Facility & UK Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-facility-phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="reg-facility-phone" placeholder="+44 20 XXXX XXXX" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-cqc-number">CQC Registration Number <span class="required">*</span></label>
+                            <input type="text" id="reg-cqc-number" placeholder="1-123456789" required>
+                            <small>Care Quality Commission registration</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-postcode">UK Postcode <span class="required">*</span></label>
+                            <input type="text" id="reg-facility-postcode" placeholder="SW1A 1AA" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-address">Full Address</label>
+                            <textarea id="reg-facility-address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-type">Facility Type</label>
+                            <select id="reg-facility-type">
+                                <option value="">Select type...</option>
+                                <option value="care_home">Care Home</option>
+                                <option value="nursing_home">Nursing Home</option>
+                                <option value="hospital">Hospital</option>
+                                <option value="assisted_living">Assisted Living</option>
+                                <option value="residential">Residential Care</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-capacity">Capacity (Number of Beds)</label>
+                            <input type="number" id="reg-capacity" min="1" placeholder="50">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-operating-hours">Operating Hours</label>
+                            <input type="text" id="reg-operating-hours" placeholder="24/7 or 9am-5pm">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Professional Info (Worker) -->
+                    <div class="form-step worker-only" data-step="3" style="display: none;">
+                        <h3>Professional Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-dbs-number">DBS Number</label>
+                            <input type="text" id="reg-dbs-number" placeholder="001234567890">
+                            <small>Disclosure & Barring Service</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-dbs-date">DBS Issue Date</label>
+                            <input type="date" id="reg-dbs-date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-nmc-number">NMC Registration Number</label>
+                            <input type="text" id="reg-nmc-number" placeholder="12A3456E">
+                            <small>Nursing & Midwifery Council (for nurses)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-nmc-expiry">NMC Expiry Date</label>
+                            <input type="date" id="reg-nmc-expiry">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-skills">Skills & Qualifications</label>
+                            <input type="text" id="reg-skills" placeholder="Nursing, Elderly Care, First Aid">
+                            <small>Comma-separated list</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-experience">Years of Experience</label>
+                            <input type="number" id="reg-experience" min="0" max="50" placeholder="5">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="reg-right-to-work" required>
+                                <span>I confirm I have the right to work in the UK <span class="required">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Company Info (Facility) -->
+                    <div class="form-step facility-only" data-step="3" style="display: none;">
+                        <h3>Company Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-company-number">Company Registration Number</label>
+                            <input type="text" id="reg-company-number" placeholder="12345678">
+                            <small>Companies House registration</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-vat-number">VAT Number</label>
+                            <input type="text" id="reg-vat-number" placeholder="GB123456789">
+                            <small>If VAT registered</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-contact-person">Contact Person Name</label>
+                            <input type="text" id="reg-contact-person">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-contact-position">Contact Person Position</label>
+                            <input type="text" id="reg-contact-position" placeholder="Manager">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-insurance-number">Insurance Policy Number</label>
+                            <input type="text" id="reg-insurance-number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-insurance-expiry">Insurance Expiry Date</label>
+                            <input type="date" id="reg-insurance-expiry">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="reg-terms" required>
+                                <span>I accept the Terms & Conditions <span class="required">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="previousStep()" style="display: none;">
+                            ← Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" id="next-btn" onclick="nextStep()">
+                            Next →
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submit-btn" style="display: none;">
+                            Complete Registration
+                        </button>
+                    </div>
                 </form>
 
                 <div id="auth-error" class="error-message"></div>

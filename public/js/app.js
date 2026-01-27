@@ -38,10 +38,179 @@ function showTab(tabName, event) {
     }
 }
 
+// Multi-Step Registration Form
+let currentStep = 1;
+let selectedRole = null;
+const totalSteps = 3;
+
+function selectRole(role) {
+    selectedRole = role;
+    document.getElementById('reg-role').value = role;
+    
+    // Update role card UI
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    document.querySelector(`.role-card[data-role="${role}"]`).classList.add('selected');
+    
+    // Show/hide role-specific fields in all steps
+    updateRoleFields();
+}
+
+function updateRoleFields() {
+    const isWorker = selectedRole === 'worker';
+    
+    document.querySelectorAll('.worker-only').forEach(el => {
+        el.style.display = isWorker ? 'block' : 'none';
+    });
+    
+    document.querySelectorAll('.facility-only').forEach(el => {
+        el.style.display = isWorker ? 'none' : 'block';
+    });
+}
+
+function updateStepIndicator() {
+    document.querySelectorAll('.step-item').forEach((item, index) => {
+        const stepNum = index + 1;
+        if (stepNum < currentStep) {
+            item.classList.add('completed');
+            item.classList.remove('active');
+        } else if (stepNum === currentStep) {
+            item.classList.add('active');
+            item.classList.remove('completed');
+        } else {
+            item.classList.remove('active', 'completed');
+        }
+    });
+}
+
+function showFormStep(step) {
+    document.querySelectorAll('.form-step').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Show the correct step based on role
+    const stepElements = document.querySelectorAll(`.form-step[data-step="${step}"]`);
+    stepElements.forEach(el => {
+        if (step === 1 || (selectedRole === 'worker' && el.classList.contains('worker-only')) || 
+            (selectedRole === 'facility' && el.classList.contains('facility-only')) ||
+            (!el.classList.contains('worker-only') && !el.classList.contains('facility-only'))) {
+            el.classList.add('active');
+        }
+    });
+    
+    // Update button visibility
+    document.getElementById('prev-btn').style.display = step > 1 ? 'inline-block' : 'none';
+    document.getElementById('next-btn').style.display = step < totalSteps ? 'inline-block' : 'none';
+    document.getElementById('submit-btn').style.display = step === totalSteps ? 'inline-block' : 'none';
+    
+    updateStepIndicator();
+}
+
+function validateStep(step) {
+    let isValid = true;
+    const currentStepEl = document.querySelector(`.form-step.active`);
+    
+    if (!currentStepEl) return false;
+    
+    const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+    
+    inputs.forEach(input => {
+        if (!input.value.trim() && input.type !== 'checkbox') {
+            input.classList.add('invalid');
+            isValid = false;
+        } else if (input.type === 'checkbox' && !input.checked) {
+            isValid = false;
+        } else {
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+        }
+    });
+    
+    // Special validations
+    if (step === 1) {
+        // Check if role is selected
+        if (!selectedRole) {
+            showError('Please select your role');
+            return false;
+        }
+        
+        // Check password match
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('reg-confirm-password').value;
+        if (password !== confirmPassword) {
+            showError('Passwords do not match');
+            document.getElementById('reg-confirm-password').classList.add('invalid');
+            return false;
+        }
+    }
+    
+    if (step === 2 && selectedRole === 'worker') {
+        // Validate NI number format
+        const niNumber = document.getElementById('reg-ni-number').value;
+        const niPattern = /^[A-Z]{2}[0-9]{6}[A-Z]$/i;
+        if (niNumber && !niPattern.test(niNumber.replace(/\s/g, ''))) {
+            showError('Invalid National Insurance number format (e.g., AB123456C)');
+            document.getElementById('reg-ni-number').classList.add('invalid');
+            return false;
+        }
+        
+        // Validate UK postcode
+        const postcode = document.getElementById('reg-postcode').value;
+        if (postcode && !validateUKPostcode(postcode)) {
+            showError('Invalid UK postcode format');
+            document.getElementById('reg-postcode').classList.add('invalid');
+            return false;
+        }
+    }
+    
+    if (step === 2 && selectedRole === 'facility') {
+        // Validate UK postcode
+        const postcode = document.getElementById('reg-facility-postcode').value;
+        if (postcode && !validateUKPostcode(postcode)) {
+            showError('Invalid UK postcode format');
+            document.getElementById('reg-facility-postcode').classList.add('invalid');
+            return false;
+        }
+    }
+    
+    if (!isValid) {
+        showError('Please fill in all required fields');
+    }
+    
+    return isValid;
+}
+
+function validateUKPostcode(postcode) {
+    const postcodePattern = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
+    return postcodePattern.test(postcode.trim());
+}
+
+function nextStep() {
+    if (validateStep(currentStep)) {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showFormStep(currentStep);
+            window.scrollTo(0, 0);
+        }
+    }
+}
+
+function previousStep() {
+    // No restrictions - always allow going back
+    if (currentStep > 1) {
+        currentStep--;
+        showFormStep(currentStep);
+        window.scrollTo(0, 0);
+    }
+}
+
 function toggleRoleFields() {
+    // Legacy function - now handled by selectRole
     const role = document.getElementById('reg-role').value;
-    document.getElementById('worker-fields').style.display = role === 'worker' ? 'block' : 'none';
-    document.getElementById('facility-fields').style.display = role === 'facility' ? 'block' : 'none';
+    if (role) {
+        selectRole(role);
+    }
 }
 
 // API Calls
@@ -93,10 +262,15 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Validate final step
+    if (!validateStep(currentStep)) {
+        return;
+    }
+
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
-    const role = document.getElementById('reg-role').value;
+    const role = selectedRole || document.getElementById('reg-role').value;
 
     const payload = {
         name, email, password, role,
@@ -104,10 +278,38 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     };
 
     if (role === 'worker') {
-        const skills = document.getElementById('reg-skills').value.split(',').map(s => s.trim());
-        payload.skills = skills;
+        // Worker-specific fields
+        payload.phone = document.getElementById('reg-phone')?.value || '';
+        payload.niNumber = document.getElementById('reg-ni-number')?.value || '';
+        payload.postcode = document.getElementById('reg-postcode')?.value || '';
+        payload.address = document.getElementById('reg-address')?.value || '';
+        payload.dateOfBirth = document.getElementById('reg-dob')?.value || '';
+        payload.emergencyContactName = document.getElementById('reg-emergency-name')?.value || '';
+        payload.emergencyContactPhone = document.getElementById('reg-emergency-phone')?.value || '';
+        payload.dbsNumber = document.getElementById('reg-dbs-number')?.value || '';
+        payload.dbsIssueDate = document.getElementById('reg-dbs-date')?.value || '';
+        payload.nmcNumber = document.getElementById('reg-nmc-number')?.value || '';
+        payload.nmcExpiryDate = document.getElementById('reg-nmc-expiry')?.value || '';
+        payload.experience = document.getElementById('reg-experience')?.value || 0;
+        payload.rightToWork = document.getElementById('reg-right-to-work')?.checked || false;
+        
+        const skillsInput = document.getElementById('reg-skills')?.value || 'Nursing, Elderly Care';
+        payload.skills = skillsInput.split(',').map(s => s.trim()).filter(s => s);
     } else {
-        payload.facilityType = document.getElementById('reg-facility-type').value;
+        // Facility-specific fields
+        payload.phone = document.getElementById('reg-facility-phone')?.value || '';
+        payload.cqcNumber = document.getElementById('reg-cqc-number')?.value || '';
+        payload.postcode = document.getElementById('reg-facility-postcode')?.value || '';
+        payload.address = document.getElementById('reg-facility-address')?.value || '';
+        payload.facilityType = document.getElementById('reg-facility-type')?.value || 'care_home';
+        payload.capacity = document.getElementById('reg-capacity')?.value || 0;
+        payload.operatingHours = document.getElementById('reg-operating-hours')?.value || '24/7';
+        payload.companyNumber = document.getElementById('reg-company-number')?.value || '';
+        payload.vatNumber = document.getElementById('reg-vat-number')?.value || '';
+        payload.contactPerson = document.getElementById('reg-contact-person')?.value || '';
+        payload.contactPosition = document.getElementById('reg-contact-position')?.value || '';
+        payload.insuranceNumber = document.getElementById('reg-insurance-number')?.value || '';
+        payload.insuranceExpiry = document.getElementById('reg-insurance-expiry')?.value || '';
     }
 
     try {
@@ -124,6 +326,11 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         } else {
             showFacilityDashboard();
         }
+        
+        // Reset form
+        currentStep = 1;
+        selectedRole = null;
+        showFormStep(1);
     } catch (error) {
         showError(error.message);
     }
@@ -412,3 +619,39 @@ function calculateDuration(start, end) {
     const diff = new Date(end) - new Date(start);
     return Math.round(diff / (1000 * 60 * 60));
 }
+
+// Initialize multi-step form on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize form to step 1
+    showFormStep(1);
+    
+    // Add input event listeners for real-time validation
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.classList.contains('invalid')) {
+                this.classList.remove('invalid');
+            }
+        });
+        
+        // Auto-format NI number
+        if (input.id === 'reg-ni-number') {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (value.length > 9) value = value.substring(0, 9);
+                e.target.value = value;
+            });
+        }
+        
+        // Auto-format UK postcode
+        if (input.id === 'reg-postcode' || input.id === 'reg-facility-postcode') {
+            input.addEventListener('blur', function(e) {
+                let value = e.target.value.toUpperCase().replace(/\s/g, '');
+                if (value.length >= 5) {
+                    // Add space before last 3 characters
+                    value = value.slice(0, -3) + ' ' + value.slice(-3);
+                }
+                e.target.value = value;
+            });
+        }
+    });
+});
