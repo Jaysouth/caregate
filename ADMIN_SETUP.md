@@ -47,7 +47,135 @@ node scripts/create-admin.js
 
 **Output:**
 ```
+⚠️  SMTP not configured. Using test email service (ethereal.email)
+   To use real emails, configure SMTP settings in .env file
+
+Creating admin user...
+
+📧 Test Email Account Created:
+   User: test@ethereal.email
+   Pass: password
+   Preview emails at: https://ethereal.email
+
 ✅ Admin user created successfully!
+   Email: info@caregate.co.uk
+   Name: CareGate Administrator
+   Role: admin
+
+📧 Sending admin credentials email to: info@caregate.co.uk
+✅ Email sent successfully!
+   Message ID: <abc123@ethereal.email>
+   Preview URL: https://ethereal.email/message/abc123
+
+📧 COPY THIS URL to view the email in your browser:
+    https://ethereal.email/message/abc123
+
+========================================
+ADMIN LOGIN CREDENTIALS (BACKUP)
+========================================
+Email: info@caregate.co.uk
+Temporary Password: XyZ9#aBc$12defGH
+
+⚠️  Password change required on first login
+========================================
+
+✅ Admin credentials have been sent to: info@caregate.co.uk
+✅ Please check the email inbox for login details.
+✅ Admin must change password on first login.
+```
+
+**Important:** 
+- If using test email, copy the preview URL to view the email
+- The credentials are also displayed in console as backup
+- Save the temporary password for first login
+
+## Email Configuration
+
+The admin creation script sends login credentials to info@caregate.co.uk via email.
+
+### Development Mode (Default)
+No configuration needed! The system uses ethereal.email for testing.
+- View emails in browser via preview URL
+- Perfect for development/testing
+- Automatic fallback if offline
+
+### Production Mode (Real Emails)
+Create a `.env` file in the project root:
+
+```env
+PORT=3000
+JWT_SECRET=your-secret-key-change-this-in-production
+NODE_ENV=production
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=noreply@caregate.co.uk
+```
+
+### SMTP Provider Examples
+
+**Gmail:**
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password  # Get from Google Account settings
+SMTP_FROM=noreply@caregate.co.uk
+```
+
+**SendGrid:**
+```env
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASS=your-sendgrid-api-key
+SMTP_FROM=noreply@caregate.co.uk
+```
+
+**AWS SES:**
+```env
+SMTP_HOST=email-smtp.eu-west-1.amazonaws.com
+SMTP_PORT=587
+SMTP_USER=your-aws-access-key
+SMTP_PASS=your-aws-secret-key
+SMTP_FROM=noreply@caregate.co.uk
+```
+
+---
+
+## Step 3: Check Email
+
+### If Using Test Email Service (Development)
+1. Copy the preview URL from console output
+2. Paste into browser
+3. View the formatted HTML email
+4. Find your temporary password
+
+### If Using Real SMTP (Production)
+1. Check inbox for info@caregate.co.uk
+2. Subject: "Your CareGate Admin Account - Login Credentials"
+3. Email contains:
+   - Login credentials
+   - Security instructions
+   - Admin features list
+   - Link to login page
+
+### Email Contents
+The email includes:
+- **Welcome message**
+- **Login credentials** (email and temporary password)
+- **Security warning** (password change required)
+- **Step-by-step instructions**
+- **List of admin features**
+- **Security tips**
+- **Login button**
+
+---
+
+## Step 4: First Login
    Email: info@caregate.co.uk
    Name: CareGate Administrator
    Role: admin
