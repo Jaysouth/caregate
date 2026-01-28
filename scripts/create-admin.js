@@ -5,8 +5,13 @@
  * Usage: node scripts/create-admin.js
  */
 
+require('dotenv').config();
 const crypto = require('crypto');
 const http = require('http');
+const path = require('path');
+
+// Import email service
+const emailService = require(path.join(__dirname, '..', 'server', 'utils', 'emailService'));
 
 const ADMIN_EMAIL = 'info@caregate.co.uk';
 const ADMIN_NAME = 'CareGate Administrator';
@@ -26,30 +31,54 @@ function generatePassword() {
   return password;
 }
 
-// Send email with password (simulated for now)
-async function sendPasswordEmail(email, password) {
-  console.log('\n========================================');
-  console.log('ADMIN PASSWORD EMAIL');
-  console.log('========================================');
-  console.log(`To: ${email}`);
-  console.log(`Subject: Your CareGate Admin Account`);
-  console.log('\nDear Administrator,');
-  console.log('\nYour CareGate admin account has been created.');
-  console.log('\nLogin Details:');
-  console.log(`Email: ${email}`);
-  console.log(`Password: ${password}`);
-  console.log('\n⚠️  IMPORTANT: You will be required to change your password on first login.');
-  console.log('\nPlease keep this information secure.');
-  console.log('\nBest regards,');
-  console.log('CareGate System');
-  console.log('========================================\n');
+// Send email with password
+async function sendPasswordEmail(email, password, name) {
+  console.log('\n📧 Sending admin credentials email to:', email);
   
-  // In production, integrate with email service (SendGrid, AWS SES, etc.)
-  // await emailService.send({
-  //   to: email,
-  //   subject: 'Your CareGate Admin Account',
-  //   html: emailTemplate
-  // });
+  try {
+    const result = await emailService.sendAdminCredentials(email, password, name);
+    
+    if (result.success) {
+      console.log('✅ Email sent successfully!');
+      
+      // Also display in console as backup
+      console.log('\n========================================');
+      console.log('ADMIN LOGIN CREDENTIALS (BACKUP)');
+      console.log('========================================');
+      console.log(`Email: ${email}`);
+      console.log(`Temporary Password: ${password}`);
+      console.log('\n⚠️  Password change required on first login');
+      console.log('========================================\n');
+      
+      return true;
+    } else {
+      console.error('❌ Failed to send email:', result.error);
+      console.log('\n⚠️  Email sending failed. Displaying credentials here:');
+      console.log('\n========================================');
+      console.log('ADMIN LOGIN CREDENTIALS');
+      console.log('========================================');
+      console.log(`Email: ${email}`);
+      console.log(`Temporary Password: ${password}`);
+      console.log('\n⚠️  Password change required on first login');
+      console.log('⚠️  PLEASE CONFIGURE SMTP SETTINGS IN .env');
+      console.log('========================================\n');
+      
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error sending email:', error.message);
+    
+    // Fallback: display in console
+    console.log('\n========================================');
+    console.log('ADMIN LOGIN CREDENTIALS (FALLBACK)');
+    console.log('========================================');
+    console.log(`Email: ${email}`);
+    console.log(`Temporary Password: ${password}`);
+    console.log('\n⚠️  Password change required on first login');
+    console.log('========================================\n');
+    
+    return false;
+  }
 }
 
 function makeRequest(path, data) {
@@ -118,9 +147,16 @@ async function createAdmin() {
       console.log(`   Role: ${response.user.role}`);
       
       // Send password via email
-      await sendPasswordEmail(ADMIN_EMAIL, password);
+      const emailSent = await sendPasswordEmail(ADMIN_EMAIL, password, response.user.name);
       
-      console.log('\n✅ Password has been sent to admin email address.');
+      if (emailSent) {
+        console.log('\n✅ Admin credentials have been sent to:', ADMIN_EMAIL);
+        console.log('✅ Please check the email inbox for login details.');
+      } else {
+        console.log('\n⚠️  Email not sent. Please configure SMTP settings in .env file');
+        console.log('   See .env.example for configuration examples');
+      }
+      
       console.log('✅ Admin must change password on first login.\n');
     }
   } catch (error) {
