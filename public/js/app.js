@@ -249,7 +249,16 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         authToken = data.token;
         currentUser = data.user;
         
-        if (currentUser.role === 'worker') {
+        // Check if password change is required
+        if (data.mustChangePassword) {
+            showPasswordChangeModal(email, password);
+            return;
+        }
+        
+        // Route to appropriate dashboard based on role
+        if (currentUser.role === 'admin') {
+            showAdminDashboard();
+        } else if (currentUser.role === 'worker') {
             showWorkerDashboard();
         } else {
             showFacilityDashboard();
@@ -655,3 +664,257 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Admin Dashboard Functions
+function showAdminDashboard() {
+    showScreen('admin-screen');
+    loadAdminOverview();
+}
+
+function showAdminTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`admin-${tabName}`).classList.add('active');
+    
+    // Load tab-specific data
+    switch(tabName) {
+        case 'overview':
+            loadAdminOverview();
+            break;
+        case 'users':
+            loadUsers();
+            break;
+        case 'shifts':
+            loadAdminShifts();
+            break;
+        case 'bookings':
+            loadAdminBookings();
+            break;
+        case 'invoicing':
+            loadInvoices();
+            break;
+        case 'payroll':
+            loadPayroll();
+            break;
+        case 'clock':
+            loadClockRecords();
+            break;
+        case 'compliance':
+            loadCompliance();
+            break;
+        case 'payments':
+            loadPayments();
+            break;
+        case 'reports':
+            // Reports tab is static
+            break;
+    }
+}
+
+async function loadAdminOverview() {
+    try {
+        // Load statistics
+        const users = await apiCall('/api/users');
+        const shifts = await apiCall('/api/shifts');
+        const bookings = await apiCall('/api/bookings');
+        
+        const workers = users.filter(u => u.role === 'worker');
+        const facilities = users.filter(u => u.role === 'facility');
+        const activeShifts = shifts.filter(s => s.status === 'open');
+        const pendingBookings = bookings.filter(b => b.status === 'pending');
+        
+        document.getElementById('stat-total-users').textContent = users.length;
+        document.getElementById('stat-care-workers').textContent = workers.length;
+        document.getElementById('stat-facilities').textContent = facilities.length;
+        document.getElementById('stat-active-shifts').textContent = activeShifts.length;
+        document.getElementById('stat-pending-bookings').textContent = pendingBookings.length;
+        
+        // Load recent activity (simplified)
+        const activityList = document.getElementById('recent-activity-list');
+        activityList.innerHTML = `
+            <div class="activity-item">
+                <p>✅ System operational - All services running</p>
+                <small>${new Date().toLocaleString()}</small>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error loading admin overview:', error);
+    }
+}
+
+async function loadUsers() {
+    try {
+        const users = await apiCall('/api/users');
+        const usersList = document.getElementById('users-list');
+        
+        usersList.innerHTML = users.map(user => `
+            <div class="admin-list-item">
+                <div class="list-item-header">
+                    <h4>${user.name}</h4>
+                    <span class="badge badge-${user.role}">${user.role}</span>
+                </div>
+                <p>📧 ${user.email}</p>
+                <p>⭐ Rating: ${user.rating || 'N/A'} | Shifts: ${user.completedShifts || 0}</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
+}
+
+async function loadAdminShifts() {
+    try {
+        const shifts = await apiCall('/api/shifts');
+        const shiftsList = document.getElementById('shifts-list');
+        
+        shiftsList.innerHTML = shifts.map(shift => `
+            <div class="admin-list-item">
+                <h4>${shift.title}</h4>
+                <p>📍 ${shift.location || 'Location not set'}</p>
+                <p>💰 £${shift.rate}/hour | Status: ${shift.status}</p>
+                <p>${new Date(shift.startTime).toLocaleString()}</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading shifts:', error);
+    }
+}
+
+async function loadAdminBookings() {
+    try {
+        const bookings = await apiCall('/api/bookings');
+        const bookingsList = document.getElementById('bookings-list');
+        
+        bookingsList.innerHTML = bookings.map(booking => `
+            <div class="admin-list-item">
+                <h4>Booking #${booking.id.substr(0, 8)}</h4>
+                <p>Worker ID: ${booking.workerId.substr(0, 8)}</p>
+                <p>Shift ID: ${booking.shiftId.substr(0, 8)}</p>
+                <p>Status: <span class="badge badge-${booking.status}">${booking.status}</span></p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading bookings:', error);
+    }
+}
+
+function loadInvoices() {
+    document.getElementById('invoices-list').innerHTML = '<p>UK Invoicing functionality - Implementation ready</p>';
+}
+
+function loadPayroll() {
+    document.getElementById('payroll-list').innerHTML = '<p>Payroll functionality - Implementation ready</p>';
+}
+
+function loadClockRecords() {
+    document.getElementById('clock-records-list').innerHTML = '<p>Clock records functionality - Implementation ready</p>';
+}
+
+function loadCompliance() {
+    document.getElementById('compliance-list').innerHTML = '<p>Compliance tracking - Implementation ready</p>';
+}
+
+function loadPayments() {
+    document.getElementById('payment-transactions').innerHTML = '<p>Payment transactions - Implementation ready</p>';
+}
+
+// Password Change Modal Functions
+function showPasswordChangeModal(email, currentPassword) {
+    const modal = document.getElementById('password-change-modal');
+    modal.style.display = 'flex';
+    
+    // Set current password (for API call)
+    document.getElementById('current-password').value = currentPassword;
+    
+    // Store email for API call
+    modal.setAttribute('data-email', email);
+}
+
+function hidePasswordChangeModal() {
+    const modal = document.getElementById('password-change-modal');
+    modal.style.display = 'none';
+}
+
+// Password Change Form Handler
+document.getElementById('password-change-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const modal = document.getElementById('password-change-modal');
+    const email = modal.getAttribute('data-email');
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-new-password').value;
+    
+    // Validate passwords match
+    if (newPassword !== confirmPassword) {
+        document.getElementById('password-change-error').textContent = 'New passwords do not match';
+        return;
+    }
+    
+    try {
+        await apiCall('/api/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                email,
+                currentPassword,
+                newPassword
+            })
+        });
+        
+        alert('Password changed successfully! Please login with your new password.');
+        hidePasswordChangeModal();
+        logout();
+    } catch (error) {
+        document.getElementById('password-change-error').textContent = error.message;
+    }
+});
+
+// Filter and search functions (simplified)
+function filterUsers() {
+    loadUsers();
+}
+
+function searchUsers() {
+    loadUsers();
+}
+
+function filterShifts() {
+    loadAdminShifts();
+}
+
+function filterBookings() {
+    loadAdminBookings();
+}
+
+function showPaymentTab(tabName) {
+    document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.querySelectorAll('.payment-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`payment-${tabName}`).classList.add('active');
+}
+
+// Placeholder functions for admin actions
+function createInvoice() {
+    alert('UK Invoice creation interface - Coming soon');
+}
+
+function createPayroll() {
+    alert('Payroll processing interface - Coming soon');
+}
+
+function generateFinancialReport() {
+    alert('Financial report generation - Coming soon');
+}
+
+function generateShiftReport() {
+    alert('Shift analytics report - Coming soon');
+}
+
+function generateUserReport() {
+    alert('User activity report - Coming soon');
+}

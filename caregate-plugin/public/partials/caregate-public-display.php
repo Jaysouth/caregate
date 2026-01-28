@@ -18,7 +18,6 @@
                     <input type="email" id="login-email" placeholder="Email" required>
                     <input type="password" id="login-password" placeholder="Password" required>
                     <button type="submit" class="btn btn-primary">Login</button>
-                    <p class="demo-info">Demo: worker@test.com / password123</p>
                 </form>
 
                 <!-- Register Form -->
