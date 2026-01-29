@@ -15,6 +15,11 @@ class CareGate_Clock {
     const GPS_PROXIMITY_THRESHOLD = 100; // 100 meters
 
     /**
+     * Off-site distance threshold for auto clock-out (in meters).
+     */
+    const OFF_SITE_THRESHOLD = 500; // 500 meters
+
+    /**
      * Heartbeat timeout for auto clock-out (in minutes).
      */
     const HEARTBEAT_TIMEOUT = 5; // 5 minutes
@@ -22,9 +27,22 @@ class CareGate_Clock {
     /**
      * Calculate distance between two GPS coordinates (Haversine formula).
      * Returns distance in meters.
+     * 
+     * @param float $lat1 Latitude of first point (-90 to 90)
+     * @param float $lng1 Longitude of first point (-180 to 180)
+     * @param float $lat2 Latitude of second point (-90 to 90)
+     * @param float $lng2 Longitude of second point (-180 to 180)
+     * @return float Distance in meters, or PHP_FLOAT_MAX if coordinates are missing/invalid
      */
     private static function calculate_gps_distance($lat1, $lng1, $lat2, $lng2) {
+        // Validate coordinates
         if (empty($lat1) || empty($lng1) || empty($lat2) || empty($lng2)) {
+            return PHP_FLOAT_MAX;
+        }
+        
+        // Check coordinate ranges
+        if ($lat1 < -90 || $lat1 > 90 || $lat2 < -90 || $lat2 > 90 ||
+            $lng1 < -180 || $lng1 > 180 || $lng2 < -180 || $lng2 > 180) {
             return PHP_FLOAT_MAX;
         }
 
@@ -191,8 +209,8 @@ class CareGate_Clock {
                 $clock_record['facility_lng']
             );
             
-            // If worker is more than 500m away, auto clock-out (off-site)
-            if ($distance > 500) {
+            // If worker is more than OFF_SITE_THRESHOLD away, auto clock-out (off-site)
+            if ($distance > self::OFF_SITE_THRESHOLD) {
                 return self::auto_clock_out_internal($clock_record, 'off_site', sprintf('Worker moved %.0fm from facility', $distance));
             }
         }
@@ -266,13 +284,16 @@ class CareGate_Clock {
         $table = $wpdb->prefix . 'caregate_clock_records';
         $timeout_minutes = self::HEARTBEAT_TIMEOUT;
         
+        // Calculate cutoff time using WordPress timezone
+        $cutoff_time = date('Y-m-d H:i:s', current_time('timestamp') - ($timeout_minutes * 60));
+        
         // Find records with stale heartbeats
         $stale_records = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $table 
              WHERE clock_out_time IS NULL 
              AND last_heartbeat IS NOT NULL
-             AND last_heartbeat < DATE_SUB(NOW(), INTERVAL %d MINUTE)",
-            $timeout_minutes
+             AND last_heartbeat < %s",
+            $cutoff_time
         ), ARRAY_A);
 
         $processed = 0;
@@ -460,7 +481,7 @@ class CareGate_Clock {
             'facilityLat' => floatval($record['facility_lat'] ?? 0),
             'facilityLng' => floatval($record['facility_lng'] ?? 0),
             'gpsVerified' => boolval($record['gps_verified'] ?? 0),
-            'autoClocked Out' => boolval($record['auto_clocked_out'] ?? 0),
+            'autoClockedOut' => boolval($record['auto_clocked_out'] ?? 0),
             'lastHeartbeat' => $record['last_heartbeat'] ?? null,
             'breakTime' => floatval($record['break_time']),
             'hoursWorked' => floatval($record['hours_worked']),
