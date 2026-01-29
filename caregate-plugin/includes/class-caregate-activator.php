@@ -252,7 +252,6 @@ class CareGate_Activator {
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY facility_id (facility_id),
-            KEY invoice_number (invoice_number),
             KEY status (status)
         ) $charset_collate;";
 
