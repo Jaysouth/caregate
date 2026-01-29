@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "build:plugin": "node scripts/build-plugin.js"
   },
   "keywords": [
     "healthcare",

