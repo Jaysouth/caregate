@@ -258,6 +258,37 @@ class CareGate_API {
             'permission_callback' => array($this, 'is_authenticated')
         ));
 
+        // Auto Clock in/out routes (GPS-based)
+        register_rest_route($this->namespace, '/auto-clock/check-in', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Auto_Clock', 'check_auto_clock_in'),
+            'permission_callback' => array($this, 'is_worker')
+        ));
+
+        register_rest_route($this->namespace, '/auto-clock/check-out', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Auto_Clock', 'check_auto_clock_out'),
+            'permission_callback' => array($this, 'is_worker')
+        ));
+
+        register_rest_route($this->namespace, '/auto-clock/clock-in', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Auto_Clock', 'auto_clock_in'),
+            'permission_callback' => array($this, 'is_worker')
+        ));
+
+        register_rest_route($this->namespace, '/auto-clock/clock-out', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Auto_Clock', 'auto_clock_out'),
+            'permission_callback' => array($this, 'is_worker')
+        ));
+
+        register_rest_route($this->namespace, '/auto-clock/config', array(
+            'methods' => 'GET',
+            'callback' => array('CareGate_Auto_Clock', 'get_config'),
+            'permission_callback' => array($this, 'is_worker')
+        ));
+
         // UK Invoice routes
         register_rest_route($this->namespace, '/uk-invoices', array(
             'methods' => 'POST',
