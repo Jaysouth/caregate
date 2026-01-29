@@ -240,31 +240,46 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
 
+    console.log('🔐 Attempting login with email:', email);
+
     try {
         const data = await apiCall('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
 
+        console.log('✅ Login successful:', data);
+
         authToken = data.token;
         currentUser = data.user;
         
+        // Store token in localStorage for persistence
+        localStorage.setItem('authToken', authToken);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        console.log('👤 User role:', currentUser.role);
+        
         // Check if password change is required
         if (data.mustChangePassword) {
+            console.log('⚠️ Password change required');
             showPasswordChangeModal(email, password);
             return;
         }
         
         // Route to appropriate dashboard based on role
         if (currentUser.role === 'admin') {
+            console.log('🎯 Routing to admin dashboard');
             showAdminDashboard();
         } else if (currentUser.role === 'worker') {
+            console.log('🎯 Routing to worker dashboard');
             showWorkerDashboard();
         } else {
+            console.log('🎯 Routing to facility dashboard');
             showFacilityDashboard();
         }
     } catch (error) {
-        showError(error.message);
+        console.error('❌ Login failed:', error);
+        showError(error.message || 'Login failed. Please check your credentials and try again.');
     }
 });
 
