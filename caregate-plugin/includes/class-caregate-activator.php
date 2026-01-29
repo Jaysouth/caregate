@@ -211,6 +211,15 @@ class CareGate_Activator {
             clock_out_method varchar(20),
             card_id varchar(100),
             location varchar(255),
+            clock_in_lat decimal(10, 8),
+            clock_in_lng decimal(11, 8),
+            clock_out_lat decimal(10, 8),
+            clock_out_lng decimal(11, 8),
+            facility_lat decimal(10, 8),
+            facility_lng decimal(11, 8),
+            gps_verified boolean DEFAULT 0,
+            auto_clocked_out boolean DEFAULT 0,
+            last_heartbeat datetime,
             break_time decimal(10,2) DEFAULT 0,
             hours_worked decimal(10,2),
             notes text,
@@ -310,6 +319,11 @@ class CareGate_Activator {
         
         // Create default admin user
         self::create_admin_user();
+        
+        // Schedule cron job for auto clock-out processing
+        if (!wp_next_scheduled('caregate_process_auto_clockouts')) {
+            wp_schedule_event(time(), 'every_5_minutes', 'caregate_process_auto_clockouts');
+        }
         
         // Flush rewrite rules
         flush_rewrite_rules();

@@ -240,6 +240,20 @@ class CareGate_API {
             'permission_callback' => array($this, 'is_authenticated')
         ));
 
+        // Auto clock-in with GPS verification
+        register_rest_route($this->namespace, '/clock/auto-in', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Clock', 'auto_clock_in'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
+        // Heartbeat for preventing auto clock-out
+        register_rest_route($this->namespace, '/clock/heartbeat', array(
+            'methods' => 'POST',
+            'callback' => array('CareGate_Clock', 'update_heartbeat'),
+            'permission_callback' => array($this, 'is_authenticated')
+        ));
+
         register_rest_route($this->namespace, '/clock/status', array(
             'methods' => 'GET',
             'callback' => array('CareGate_Clock', 'get_clock_status'),

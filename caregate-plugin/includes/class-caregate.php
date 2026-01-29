@@ -34,6 +34,7 @@ class CareGate {
         $this->define_admin_hooks();
         $this->define_public_hooks();
         $this->define_api_hooks();
+        $this->define_cron_hooks();
     }
 
     /**
@@ -90,6 +91,30 @@ class CareGate {
         $plugin_api = new CareGate_API();
 
         $this->loader->add_action('rest_api_init', $plugin_api, 'register_routes');
+    }
+
+    /**
+     * Register cron jobs for background processing.
+     */
+    private function define_cron_hooks() {
+        // Add custom cron schedule for 5 minutes
+        $this->loader->add_filter('cron_schedules', $this, 'add_cron_schedules');
+        
+        // Hook for processing auto clock-outs
+        $this->loader->add_action('caregate_process_auto_clockouts', 'CareGate_Clock', 'process_auto_clockouts');
+    }
+
+    /**
+     * Add custom cron schedules.
+     */
+    public function add_cron_schedules($schedules) {
+        if (!isset($schedules['every_5_minutes'])) {
+            $schedules['every_5_minutes'] = array(
+                'interval' => 300, // 5 minutes in seconds
+                'display' => __('Every 5 Minutes', 'caregate')
+            );
+        }
+        return $schedules;
     }
 
     /**
