@@ -13,7 +13,7 @@ const path = require('path');
 // Import email service
 const emailService = require(path.join(__dirname, '..', 'server', 'utils', 'emailService'));
 
-const ADMIN_EMAIL = 'info@caregate.co.uk';
+const ADMIN_EMAIL = 'admin@caregate.co.uk';
 const ADMIN_NAME = 'CareGate Administrator';
 const API_BASE = process.env.API_BASE || 'http://localhost:3000';
 

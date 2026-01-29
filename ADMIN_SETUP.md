@@ -58,11 +58,11 @@ Creating admin user...
    Preview emails at: https://ethereal.email
 
 ✅ Admin user created successfully!
-   Email: info@caregate.co.uk
+   Email: admin@caregate.co.uk
    Name: CareGate Administrator
    Role: admin
 
-📧 Sending admin credentials email to: info@caregate.co.uk
+📧 Sending admin credentials email to: admin@caregate.co.uk
 ✅ Email sent successfully!
    Message ID: <abc123@ethereal.email>
    Preview URL: https://ethereal.email/message/abc123
@@ -73,13 +73,13 @@ Creating admin user...
 ========================================
 ADMIN LOGIN CREDENTIALS (BACKUP)
 ========================================
-Email: info@caregate.co.uk
+Email: admin@caregate.co.uk
 Temporary Password: XyZ9#aBc$12defGH
 
 ⚠️  Password change required on first login
 ========================================
 
-✅ Admin credentials have been sent to: info@caregate.co.uk
+✅ Admin credentials have been sent to: admin@caregate.co.uk
 ✅ Please check the email inbox for login details.
 ✅ Admin must change password on first login.
 ```
@@ -91,7 +91,7 @@ Temporary Password: XyZ9#aBc$12defGH
 
 ## Email Configuration
 
-The admin creation script sends login credentials to info@caregate.co.uk via email.
+The admin creation script sends login credentials to admin@caregate.co.uk via email.
 
 ### Development Mode (Default)
 No configuration needed! The system uses ethereal.email for testing.
@@ -155,7 +155,7 @@ SMTP_FROM=noreply@caregate.co.uk
 4. Find your temporary password
 
 ### If Using Real SMTP (Production)
-1. Check inbox for info@caregate.co.uk
+1. Check inbox for admin@caregate.co.uk
 2. Subject: "Your CareGate Admin Account - Login Credentials"
 3. Email contains:
    - Login credentials
@@ -176,14 +176,14 @@ The email includes:
 ---
 
 ## Step 4: First Login
-   Email: info@caregate.co.uk
+   Email: admin@caregate.co.uk
    Name: CareGate Administrator
    Role: admin
 
 ========================================
 ADMIN PASSWORD EMAIL
 ========================================
-To: info@caregate.co.uk
+To: admin@caregate.co.uk
 Password: [16-character secure password]
 
 ⚠️  IMPORTANT: You will be required to change your password on first login.
@@ -194,7 +194,7 @@ Password: [16-character secure password]
 
 ### Step 3: First Login
 1. Open browser to: http://localhost:3000
-2. Enter email: `info@caregate.co.uk`
+2. Enter email: `admin@caregate.co.uk`
 3. Enter temporary password (from step 2)
 4. Click "Login"
 
@@ -209,7 +209,7 @@ Password: [16-character secure password]
 
 ### Step 5: Login with New Password
 1. After password change, you'll be redirected to login
-2. Enter email: `info@caregate.co.uk`
+2. Enter email: `admin@caregate.co.uk`
 3. Enter your new password
 4. Click "Login"
 5. Admin dashboard will load ✅
@@ -281,7 +281,7 @@ POST /api/auth/create-admin
 Content-Type: application/json
 
 {
-  "email": "info@caregate.co.uk",
+  "email": "admin@caregate.co.uk",
   "password": "SecurePassword123",
   "name": "CareGate Administrator"
 }
@@ -293,7 +293,7 @@ Content-Type: application/json
   "message": "Admin user created successfully",
   "user": {
     "id": "...",
-    "email": "info@caregate.co.uk",
+    "email": "admin@caregate.co.uk",
     "name": "CareGate Administrator",
     "role": "admin",
     "mustChangePassword": true
@@ -307,7 +307,7 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "info@caregate.co.uk",
+  "email": "admin@caregate.co.uk",
   "password": "current_password"
 }
 ```
@@ -328,7 +328,7 @@ POST /api/auth/change-password
 Content-Type: application/json
 
 {
-  "email": "info@caregate.co.uk",
+  "email": "admin@caregate.co.uk",
   "currentPassword": "old_password",
   "newPassword": "new_password"
 }
@@ -363,7 +363,7 @@ For production with persistent database:
 ### Issue: Cannot access admin dashboard
 **Cause:** Not logged in as admin role
 **Solution:**
-- Ensure you're using admin credentials (info@caregate.co.uk)
+- Ensure you're using admin credentials (admin@caregate.co.uk)
 - Check user role in database
 - Verify token is valid
 
@@ -439,7 +439,7 @@ DATABASE_URL=postgresql://...
 ## Admin User Details
 
 **Default Admin:**
-- **Email:** info@caregate.co.uk
+- **Email:** admin@caregate.co.uk
 - **Name:** CareGate Administrator
 - **Role:** admin
 - **Initial Password:** Auto-generated (16 characters)
