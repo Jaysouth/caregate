@@ -341,5 +341,20 @@ class CareGate_Activator {
                 'caregate_generate_invoices' => true,
             )
         );
+        
+        // Frontend Admin role (can only access frontend dashboard, not wp-admin)
+        add_role(
+            'caregate_frontend_admin',
+            __('CareGate Frontend Admin', 'caregate'),
+            array(
+                'read' => true,
+                'caregate_manage_settings' => true,
+                'caregate_manage_invoices' => true,
+                'caregate_manage_payroll' => true,
+                'caregate_manage_clock' => true,
+                'caregate_view_reports' => true,
+                'caregate_manage_users' => true,
+            )
+        );
     }
 }

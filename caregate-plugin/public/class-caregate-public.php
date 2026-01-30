@@ -23,12 +23,14 @@ class CareGate_Public {
     }
     
     /**
-     * Hide WordPress admin bar for CareGate users (workers and facilities).
+     * Hide WordPress admin bar for CareGate users (workers, facilities, and frontend admins).
      */
     public function hide_admin_bar_for_caregate_users() {
         $user = wp_get_current_user();
         
-        if ($user && (in_array('caregate_worker', (array) $user->roles) || in_array('caregate_facility', (array) $user->roles))) {
+        if ($user && (in_array('caregate_worker', (array) $user->roles) || 
+                      in_array('caregate_facility', (array) $user->roles) ||
+                      in_array('caregate_frontend_admin', (array) $user->roles))) {
             show_admin_bar(false);
             add_filter('show_admin_bar', '__return_false');
             
@@ -53,8 +55,10 @@ class CareGate_Public {
     public function prevent_admin_access_for_caregate_users() {
         $user = wp_get_current_user();
         
-        // Check if user is a CareGate worker or facility
-        if ($user && (in_array('caregate_worker', (array) $user->roles) || in_array('caregate_facility', (array) $user->roles))) {
+        // Check if user is a CareGate worker, facility, or frontend admin
+        if ($user && (in_array('caregate_worker', (array) $user->roles) || 
+                      in_array('caregate_facility', (array) $user->roles) ||
+                      in_array('caregate_frontend_admin', (array) $user->roles))) {
             // Don't block AJAX requests
             if (defined('DOING_AJAX') && DOING_AJAX) {
                 return;
