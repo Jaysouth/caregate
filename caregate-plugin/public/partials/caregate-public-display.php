@@ -1,3 +1,17 @@
+<?php
+/**
+ * CareGate Frontend Display
+ * Shortcode: [caregate_app]
+ *
+ * @package    CareGate
+ * @subpackage CareGate/public/partials
+ */
+
+// If this file is called directly, abort.
+if (!defined('WPINC')) {
+    die;
+}
+?>
     <div id="app">
         <!-- Login/Register Screen -->
         <div id="auth-screen" class="screen active">
