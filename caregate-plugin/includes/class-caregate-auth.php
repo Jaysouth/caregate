@@ -163,47 +163,6 @@ class CareGate_Auth {
             return new WP_Error('missing_fields', 'Email and password required', array('status' => 400));
         }
 
-        // Authenticate user
-        $user = wp_authenticate($email, $password);
-
-        if (is_wp_error($user)) {
-            return new WP_Error('invalid_credentials', 'Invalid credentials', array('status' => 401));
-        }
-
-        // Check if 2FA is enabled
-        if (CareGate_TwoFA::is_2fa_enabled($user->ID)) {
-            // Generate and send OTP
-            $otp_code = CareGate_TwoFA::generate_otp();
-            $otp_result = CareGate_TwoFA::store_otp($user->ID, $otp_code, 'email');
-            
-            if (is_wp_error($otp_result)) {
-                return new WP_Error('otp_limit', 'Maximum OTP attempts reached. Please try again later.', array('status' => 429));
-            }
-
-            // Send OTP via email and SMS
-            CareGate_TwoFA::send_otp_email($user->ID, $otp_code);
-            CareGate_TwoFA::send_otp_sms($user->ID, $otp_code);
-
-            return new WP_REST_Response(array(
-                'message' => 'OTP sent to your registered email/phone',
-                'requiresOtp' => true,
-                'userId' => $user->ID
-            ), 200);
-        }
-
-        // Generate token
-        $token = self::generate_token($user->ID);
-
-        // Get user data
-        $user_data = self::get_user_data($user->ID);
-
-        return new WP_REST_Response(array(
-            'message' => 'Login successful',
-            'user' => $user_data,
-            'token' => $token
-        ), 200);
-    }
-
     /**
      * Verify OTP and complete login/registration.
      */
