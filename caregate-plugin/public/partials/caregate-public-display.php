@@ -32,6 +32,10 @@ if (!defined('WPINC')) {
                     <input type="email" id="login-email" placeholder="Email" required>
                     <input type="password" id="login-password" placeholder="Password" required>
                     <button type="submit" class="btn btn-primary">Login</button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" id="forgot-password-link" style="color: #6366f1; text-decoration: none; font-size: 14px;">Forgot Password?</a>
+                    </div>
+                    <p class="demo-info" style="margin-top: 15px; text-align: center; padding: 10px; background-color: #f3f4f6; border-radius: 8px; font-size: 14px;">Demo: worker@test.com / password123</p>
                 </form>
 
                 <!-- Register Form -->
