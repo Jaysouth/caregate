@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareGate - On-Demand Care Staffing</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login/Register Screen -->
+        <div id="auth-screen" class="screen active">
+            <div class="container">
+                <div class="logo">
+                    <h1>🏥 CareGate</h1>
+                    <p>On-Demand Care Staffing Platform</p>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('login', event)">Login</button>
+                    <button class="tab" onclick="showTab('register', event)">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <h2>Login</h2>
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form multi-step-form" style="display: none;">
+                    <h2>Register</h2>
+                    
+                    <!-- Progress Indicator -->
+                    <div class="progress-indicator">
+                        <div class="step-item active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Account</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-item" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Details</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-item" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Professional</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Account Information -->
+                    <div class="form-step active" data-step="1">
+                        <h3>Account Information</h3>
+                        
+                        <div class="form-group">
+                            <label>Select Your Role <span class="required">*</span></label>
+                            <div class="role-selection">
+                                <div class="role-card" onclick="selectRole('worker')" data-role="worker">
+                                    <div class="role-icon">👨‍⚕️</div>
+                                    <div class="role-title">Care Worker</div>
+                                    <div class="role-desc">Healthcare professional</div>
+                                </div>
+                                <div class="role-card" onclick="selectRole('facility')" data-role="facility">
+                                    <div class="role-icon">🏥</div>
+                                    <div class="role-title">Care Facility</div>
+                                    <div class="role-desc">Care home or hospital</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="reg-role" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-name">Full Name / Facility Name <span class="required">*</span></label>
+                            <input type="text" id="reg-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="reg-email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-password">Password <span class="required">*</span></label>
+                            <input type="password" id="reg-password" minlength="8" required>
+                            <small>Minimum 8 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-confirm-password">Confirm Password <span class="required">*</span></label>
+                            <input type="password" id="reg-confirm-password" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: UK Details (Worker) -->
+                    <div class="form-step worker-only" data-step="2" style="display: none;">
+                        <h3>Personal & UK Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="reg-phone" placeholder="+44 7XXX XXXXXX" required>
+                            <small>UK format: +44 or 0</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-ni-number">National Insurance Number <span class="required">*</span></label>
+                            <input type="text" id="reg-ni-number" placeholder="AB123456C" maxlength="9" required>
+                            <small>Format: 2 letters, 6 digits, 1 letter</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-postcode">UK Postcode <span class="required">*</span></label>
+                            <input type="text" id="reg-postcode" placeholder="SW1A 1AA" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-address">Full Address</label>
+                            <textarea id="reg-address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-dob">Date of Birth</label>
+                            <input type="date" id="reg-dob">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-emergency-name">Emergency Contact Name</label>
+                            <input type="text" id="reg-emergency-name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-emergency-phone">Emergency Contact Phone</label>
+                            <input type="tel" id="reg-emergency-phone">
+                        </div>
+                    </div>
+
+                    <!-- Step 2: UK Details (Facility) -->
+                    <div class="form-step facility-only" data-step="2" style="display: none;">
+                        <h3>Facility & UK Details</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-facility-phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="reg-facility-phone" placeholder="+44 20 XXXX XXXX" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-cqc-number">CQC Registration Number <span class="required">*</span></label>
+                            <input type="text" id="reg-cqc-number" placeholder="1-123456789" required>
+                            <small>Care Quality Commission registration</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-postcode">UK Postcode <span class="required">*</span></label>
+                            <input type="text" id="reg-facility-postcode" placeholder="SW1A 1AA" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-address">Full Address</label>
+                            <textarea id="reg-facility-address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-facility-type">Facility Type</label>
+                            <select id="reg-facility-type">
+                                <option value="">Select type...</option>
+                                <option value="care_home">Care Home</option>
+                                <option value="nursing_home">Nursing Home</option>
+                                <option value="hospital">Hospital</option>
+                                <option value="assisted_living">Assisted Living</option>
+                                <option value="residential">Residential Care</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-capacity">Capacity (Number of Beds)</label>
+                            <input type="number" id="reg-capacity" min="1" placeholder="50">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-operating-hours">Operating Hours</label>
+                            <input type="text" id="reg-operating-hours" placeholder="24/7 or 9am-5pm">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Professional Info (Worker) -->
+                    <div class="form-step worker-only" data-step="3" style="display: none;">
+                        <h3>Professional Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-dbs-number">DBS Number</label>
+                            <input type="text" id="reg-dbs-number" placeholder="001234567890">
+                            <small>Disclosure & Barring Service</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-dbs-date">DBS Issue Date</label>
+                            <input type="date" id="reg-dbs-date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-nmc-number">NMC Registration Number</label>
+                            <input type="text" id="reg-nmc-number" placeholder="12A3456E">
+                            <small>Nursing & Midwifery Council (for nurses)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-nmc-expiry">NMC Expiry Date</label>
+                            <input type="date" id="reg-nmc-expiry">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-skills">Skills & Qualifications</label>
+                            <input type="text" id="reg-skills" placeholder="Nursing, Elderly Care, First Aid">
+                            <small>Comma-separated list</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-experience">Years of Experience</label>
+                            <input type="number" id="reg-experience" min="0" max="50" placeholder="5">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="reg-right-to-work" required>
+                                <span>I confirm I have the right to work in the UK <span class="required">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Company Info (Facility) -->
+                    <div class="form-step facility-only" data-step="3" style="display: none;">
+                        <h3>Company Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="reg-company-number">Company Registration Number</label>
+                            <input type="text" id="reg-company-number" placeholder="12345678">
+                            <small>Companies House registration</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-vat-number">VAT Number</label>
+                            <input type="text" id="reg-vat-number" placeholder="GB123456789">
+                            <small>If VAT registered</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-contact-person">Contact Person Name</label>
+                            <input type="text" id="reg-contact-person">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-contact-position">Contact Person Position</label>
+                            <input type="text" id="reg-contact-position" placeholder="Manager">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-insurance-number">Insurance Policy Number</label>
+                            <input type="text" id="reg-insurance-number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-insurance-expiry">Insurance Expiry Date</label>
+                            <input type="date" id="reg-insurance-expiry">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="reg-terms" required>
+                                <span>I accept the Terms & Conditions <span class="required">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="previousStep()" style="display: none;">
+                            ← Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" id="next-btn" onclick="nextStep()">
+                            Next →
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submit-btn" style="display: none;">
+                            Complete Registration
+                        </button>
+                    </div>
+                </form>
+
+                <div id="auth-error" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Worker Dashboard -->
+        <div id="worker-screen" class="screen">
+            <nav class="navbar">
+                <h2>CareGate - Worker</h2>
+                <button onclick="logout()" class="btn btn-small">Logout</button>
+            </nav>
+            
+            <div class="container">
+                <div class="welcome">
+                    <h3 id="worker-name">Welcome</h3>
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-value" id="worker-rating">5.0</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="worker-shifts">0</span>
+                            <span class="stat-label">Shifts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchWorkerTab('matches', event)">Matched Shifts</button>
+                    <button class="tab" onclick="switchWorkerTab('bookings', event)">My Bookings</button>
+                    <button class="tab" onclick="switchWorkerTab('compliance', event)">Compliance</button>
+                </div>
+
+                <div id="worker-matches" class="tab-content">
+                    <h3>Matched Shifts for You</h3>
+                    <div id="matches-list" class="shifts-list"></div>
+                </div>
+
+                <div id="worker-bookings" class="tab-content" style="display: none;">
+                    <h3>My Bookings</h3>
+                    <div id="bookings-list" class="bookings-list"></div>
+                </div>
+
+                <div id="worker-compliance" class="tab-content" style="display: none;">
+                    <h3>Compliance Status</h3>
+                    <div id="compliance-info" class="compliance-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facility Dashboard -->
+        <div id="facility-screen" class="screen">
+            <nav class="navbar">
+                <h2>CareGate - Facility</h2>
+                <button onclick="logout()" class="btn btn-small">Logout</button>
+            </nav>
+            
+            <div class="container">
+                <div class="welcome">
+                    <h3 id="facility-name">Welcome</h3>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchFacilityTab('shifts', event)">My Shifts</button>
+                    <button class="tab" onclick="switchFacilityTab('create', event)">Create Shift</button>
+                    <button class="tab" onclick="switchFacilityTab('bookings', event)">Applications</button>
+                </div>
+
+                <div id="facility-shifts" class="tab-content">
+                    <h3>My Posted Shifts</h3>
+                    <div id="facility-shifts-list" class="shifts-list"></div>
+                </div>
+
+                <div id="facility-create" class="tab-content" style="display: none;">
+                    <h3>Create New Shift</h3>
+                    <form id="create-shift-form">
+                        <input type="text" id="shift-title" placeholder="Shift Title" required>
+                        <textarea id="shift-description" placeholder="Description" rows="3"></textarea>
+                        <label>Start Time</label>
+                        <input type="datetime-local" id="shift-start" required>
+                        <label>End Time</label>
+                        <input type="datetime-local" id="shift-end" required>
+                        <input type="text" id="shift-skills" placeholder="Required Skills (comma-separated)" value="Nursing, Elderly Care">
+                        <input type="number" id="shift-rate" placeholder="Base Rate (£/hour)" step="0.01" value="20.00" required>
+                        <label>Skill Level</label>
+                        <select id="shift-skill-level">
+                            <option value="basic">Basic</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Create Shift</button>
+                    </form>
+                </div>
+
+                <div id="facility-bookings" class="tab-content" style="display: none;">
+                    <h3>Shift Applications</h3>
+                    <div id="facility-bookings-list" class="bookings-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-screen" class="screen">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h1>🔐 Admin Dashboard</h1>
+                    <p>CareGate Platform Administration</p>
+                    <button onclick="logout()" class="btn btn-secondary">Logout</button>
+                </div>
+
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="showAdminTab('overview')">Overview</button>
+                    <button class="admin-tab" onclick="showAdminTab('users')">User Management</button>
+                    <button class="admin-tab" onclick="showAdminTab('shifts')">Shifts</button>
+                    <button class="admin-tab" onclick="showAdminTab('bookings')">Bookings</button>
+                    <button class="admin-tab" onclick="showAdminTab('invoicing')">Invoicing</button>
+                    <button class="admin-tab" onclick="showAdminTab('payroll')">Payroll</button>
+                    <button class="admin-tab" onclick="showAdminTab('clock')">Clock System</button>
+                    <button class="admin-tab" onclick="showAdminTab('compliance')">Compliance</button>
+                    <button class="admin-tab" onclick="showAdminTab('payments')">Payments</button>
+                    <button class="admin-tab" onclick="showAdminTab('reports')">Reports</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="admin-overview" class="admin-tab-content active">
+                    <h2>Platform Overview</h2>
+                    <div class="admin-stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-total-users">0</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-care-workers">0</div>
+                            <div class="stat-label">Care Workers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-facilities">0</div>
+                            <div class="stat-label">Facilities</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-active-shifts">0</div>
+                            <div class="stat-label">Active Shifts</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-pending-bookings">0</div>
+                            <div class="stat-label">Pending Bookings</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-clocked-in">0</div>
+                            <div class="stat-label">Currently Clocked In</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-recent-activity">
+                        <h3>Recent Activity</h3>
+                        <div id="recent-activity-list" class="activity-list"></div>
+                    </div>
+                </div>
+
+                <!-- User Management Tab -->
+                <div id="admin-users" class="admin-tab-content">
+                    <h2>User Management</h2>
+                    <div class="admin-filters">
+                        <select id="user-role-filter" onchange="filterUsers()">
+                            <option value="all">All Users</option>
+                            <option value="worker">Care Workers</option>
+                            <option value="facility">Care Facilities</option>
+                        </select>
+                        <input type="search" id="user-search" placeholder="Search users..." oninput="searchUsers()">
+                    </div>
+                    <div id="users-list" class="admin-list"></div>
+                </div>
+
+                <!-- Shifts Tab -->
+                <div id="admin-shifts" class="admin-tab-content">
+                    <h2>Shift Management</h2>
+                    <div class="admin-filters">
+                        <select id="shift-status-filter" onchange="filterShifts()">
+                            <option value="all">All Shifts</option>
+                            <option value="open">Open</option>
+                            <option value="filled">Filled</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div id="shifts-list" class="admin-list"></div>
+                </div>
+
+                <!-- Bookings Tab -->
+                <div id="admin-bookings" class="admin-tab-content">
+                    <h2>Booking Management</h2>
+                    <div class="admin-filters">
+                        <select id="booking-status-filter" onchange="filterBookings()">
+                            <option value="all">All Bookings</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div id="bookings-list" class="admin-list"></div>
+                </div>
+
+                <!-- Invoicing Tab -->
+                <div id="admin-invoicing" class="admin-tab-content">
+                    <h2>UK Invoicing</h2>
+                    <p>Manage HMRC-compliant invoices to care facilities</p>
+                    <button onclick="createInvoice()" class="btn btn-primary">Create New Invoice</button>
+                    <div id="invoices-list" class="admin-list"></div>
+                </div>
+
+                <!-- Payroll Tab -->
+                <div id="admin-payroll" class="admin-tab-content">
+                    <h2>Payroll Management</h2>
+                    <p>Calculate and process UK tax-compliant salary payments</p>
+                    <button onclick="createPayroll()" class="btn btn-primary">Process Payroll</button>
+                    <div id="payroll-list" class="admin-list"></div>
+                </div>
+
+                <!-- Clock System Tab -->
+                <div id="admin-clock" class="admin-tab-content">
+                    <h2>Timesheet Clock System</h2>
+                    <div class="clock-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="clock-stat-active">0</div>
+                            <div class="stat-label">Currently Working</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="clock-stat-today">0</div>
+                            <div class="stat-label">Completed Today</div>
+                        </div>
+                    </div>
+                    <div id="clock-records-list" class="admin-list"></div>
+                </div>
+
+                <!-- Compliance Tab -->
+                <div id="admin-compliance" class="admin-tab-content">
+                    <h2>Compliance Tracking</h2>
+                    <p>Monitor UK healthcare compliance documents</p>
+                    <div id="compliance-list" class="admin-list"></div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="admin-payments" class="admin-tab-content">
+                    <h2>Payment Management</h2>
+                    <p>Paystack payment transactions</p>
+                    <div class="payment-tabs">
+                        <button class="sub-tab active" onclick="showPaymentTab('transactions')">Transactions</button>
+                        <button class="sub-tab" onclick="showPaymentTab('bank-accounts')">Bank Accounts</button>
+                    </div>
+                    <div id="payment-transactions" class="payment-tab-content active"></div>
+                    <div id="payment-bank-accounts" class="payment-tab-content"></div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="admin-reports" class="admin-tab-content">
+                    <h2>Reports & Analytics</h2>
+                    <div class="report-cards">
+                        <div class="report-card">
+                            <h3>Financial Summary</h3>
+                            <button onclick="generateFinancialReport()" class="btn btn-primary">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <h3>Shift Analytics</h3>
+                            <button onclick="generateShiftReport()" class="btn btn-primary">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <h3>User Activity</h3>
+                            <button onclick="generateUserReport()" class="btn btn-primary">Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Change Modal -->
+        <div id="password-change-modal" class="modal">
+            <div class="modal-content">
+                <h2>🔒 Password Change Required</h2>
+                <p>For security reasons, you must change your password before continuing.</p>
+                <form id="password-change-form">
+                    <input type="password" id="current-password" placeholder="Current Password" required>
+                    <input type="password" id="new-password" placeholder="New Password (min 8 characters)" minlength="8" required>
+                    <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+                <div id="password-change-error" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
